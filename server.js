@@ -32,7 +32,7 @@ app.get("/", (req, res) => {
 
 
 // 📦 Authentication routes
-app.use("/", authRoutes);
+app.use("/auth", authRoutes);
 
 // 📦 API routes for CRUD operations
 app.use("/api/users", userRoutes); // 👈 Add this line

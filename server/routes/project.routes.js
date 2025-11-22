@@ -8,13 +8,20 @@ import {
   deleteAllProjects,
 } from "../controllers/project.controller.js";
 
+import authCtrl from "../controllers/auth.controller.js";
+
 const router = express.Router();
 
-router.post("/", createProject);
+// ⭐ PUBLIC
 router.get("/", getAllProjects);
 router.get("/:id", getProjectById);
-router.put("/:id", updateProject);
-router.delete("/:id", deleteProject);
-router.delete("/", deleteAllProjects);
+
+// ⭐ USER must be logged in (NOT admin)
+router.post("/", authCtrl.requireSignin, createProject);
+router.put("/:id", authCtrl.requireSignin, updateProject);
+
+// ⭐ ONLY ADMIN can delete
+router.delete("/:id", authCtrl.requireSignin, authCtrl.isAdmin, deleteProject);
+router.delete("/", authCtrl.requireSignin, authCtrl.isAdmin, deleteAllProjects);
 
 export default router;

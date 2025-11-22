@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 
-const Contact = () => {
+const Signin = () => {
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
-    message: "",
+    password: "",
   });
 
-  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Handle input changes
   const handleChange = (e) => {
@@ -18,54 +17,49 @@ const Contact = () => {
     });
   };
 
-  // Submit form
+  // Handle signin request
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess("");
     setError("");
+    setSuccess("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/contacts", {
+      const res = await fetch("http://localhost:3000/auth/signin", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Error submitting contact form");
+        setError(data.error || "Invalid email or password");
         return;
       }
 
-      setSuccess("Message sent successfully!");
-      setFormData({ name: "", email: "", message: "" });
+      // Store token + user info in localStorage
+      localStorage.setItem("jwt", JSON.stringify(data));
 
-    } catch (err) {
+      setSuccess("Signin successful! Redirecting...");
+
+      // Redirect to home/dashboard after success
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1500);
+
+    } catch (error) {
       setError("Something went wrong. Try again.");
     }
   };
 
   return (
     <div style={styles.container}>
-      <h2>Contact Us</h2>
+      <h2 style={styles.heading}>Sign In</h2>
 
-      {success && <p style={styles.success}>{success}</p>}
       {error && <p style={styles.error}>{error}</p>}
+      {success && <p style={styles.success}>{success}</p>}
 
       <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          value={formData.name}
-          onChange={handleChange}
-          style={styles.input}
-          required
-        />
-
         <input
           type="email"
           name="email"
@@ -76,32 +70,41 @@ const Contact = () => {
           required
         />
 
-        <textarea
-          name="message"
-          placeholder="Your Message"
-          value={formData.message}
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
           onChange={handleChange}
-          style={styles.textarea}
+          style={styles.input}
           required
         />
 
         <button type="submit" style={styles.button}>
-          Send Message
+          Sign In
         </button>
       </form>
+
+      <p style={{ marginTop: "15px" }}>
+        Don’t have an account? <a href="/signup">Create one</a>
+      </p>
     </div>
   );
 };
 
-// Styles
+// UI Styles
 const styles = {
   container: {
-    width: "450px",
+    width: "350px",
     margin: "40px auto",
     padding: "25px",
-    background: "white",
-    border: "1px solid #ddd",
     borderRadius: "10px",
+    background: "#ffffff",
+    border: "1px solid #ddd",
+    textAlign: "center",
+  },
+  heading: {
+    marginBottom: "20px",
   },
   form: {
     display: "flex",
@@ -113,33 +116,26 @@ const styles = {
     borderRadius: "6px",
     border: "1px solid #ccc",
   },
-  textarea: {
-    padding: "10px",
-    height: "90px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-  },
   button: {
     padding: "10px",
-    background: "#3b5bff",
-    color: "white",
+    borderRadius: "6px",
     border: "none",
-    borderRadius: "6px",
+    backgroundColor: "#2196f3",
+    color: "#fff",
     cursor: "pointer",
-    fontWeight: "bold",
-  },
-  success: {
-    background: "#ddffdd",
-    padding: "10px",
-    borderRadius: "6px",
-    color: "#2d7a2d",
   },
   error: {
     background: "#ffdddd",
-    padding: "10px",
+    color: "#d8000c",
+    padding: "8px",
     borderRadius: "6px",
-    color: "#b30000",
+  },
+  success: {
+    background: "#ddffdd",
+    color: "#4F8A10",
+    padding: "8px",
+    borderRadius: "6px",
   },
 };
 
-export default Contact;
+export default Signin;

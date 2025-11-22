@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import crypto from "crypto";
+
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -21,22 +22,34 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
+  // 🔐 Required for authentication
   hashed_password: {
     type: String,
     required: "Password is required",
   },
   salt: String,
+
+  // 🔑 NEW FIELD FOR ASSIGNMENT 3 (Role-based Authentication)
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
 });
+
+// 🔐 Virtual field for password
 UserSchema.virtual("password")
   .set(function (password) {
     this._password = password;
     this.salt = this.makeSalt();
     this.hashed_password = this.encryptPassword(password);
-    //this.hashed_password = password;
   })
   .get(function () {
     return this._password;
   });
+
+// Validation: Password must be at least 6 chars
 UserSchema.path("hashed_password").validate(function (v) {
   if (this._password && this._password.length < 6) {
     this.invalidate("password", "Password must be at least 6 characters.");
@@ -46,6 +59,7 @@ UserSchema.path("hashed_password").validate(function (v) {
   }
 }, null);
 
+// 🔐 Authentication functions
 UserSchema.methods = {
   authenticate: function (plainText) {
     return this.encryptPassword(plainText) === this.hashed_password;
@@ -67,4 +81,3 @@ UserSchema.methods = {
 };
 
 export default mongoose.model("User", UserSchema);
-

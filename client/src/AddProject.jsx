@@ -1,16 +1,21 @@
 import React, { useState } from "react";
+import { isAuthenticated } from "./auth";
 
-const Contact = () => {
+
+const AddProject = () => {
+  const auth = isAuthenticated();
+  const token = auth ? auth.token : null;
+
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
+    title: "",
+    description: "",
+    githubLink: "",
   });
 
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  // Handle input changes
+  // Handle change
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -25,10 +30,11 @@ const Contact = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/contacts", {
+      const res = await fetch("http://localhost:3000/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
         },
         body: JSON.stringify(formData),
       });
@@ -36,21 +42,26 @@ const Contact = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Error submitting contact form");
+        setError(data.error || "Error adding project");
         return;
       }
 
-      setSuccess("Message sent successfully!");
-      setFormData({ name: "", email: "", message: "" });
+      setSuccess("Project added successfully!");
+      setFormData({ title: "", description: "", githubLink: "" });
+
+      // Redirect back to Admin
+      setTimeout(() => {
+        window.location.href = "/admin";
+      }, 1500);
 
     } catch (err) {
-      setError("Something went wrong. Try again.");
+      setError("Something went wrong");
     }
   };
 
   return (
     <div style={styles.container}>
-      <h2>Contact Us</h2>
+      <h2>Add New Project</h2>
 
       {success && <p style={styles.success}>{success}</p>}
       {error && <p style={styles.error}>{error}</p>}
@@ -58,35 +69,34 @@ const Contact = () => {
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
           type="text"
-          name="name"
-          placeholder="Full Name"
-          value={formData.name}
-          onChange={handleChange}
-          style={styles.input}
-          required
-        />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email Address"
-          value={formData.email}
+          name="title"
+          placeholder="Project Title"
+          value={formData.title}
           onChange={handleChange}
           style={styles.input}
           required
         />
 
         <textarea
-          name="message"
-          placeholder="Your Message"
-          value={formData.message}
+          name="description"
+          placeholder="Project Description"
+          value={formData.description}
           onChange={handleChange}
           style={styles.textarea}
           required
         />
 
+        <input
+          type="text"
+          name="githubLink"
+          placeholder="GitHub Link"
+          value={formData.githubLink}
+          onChange={handleChange}
+          style={styles.input}
+        />
+
         <button type="submit" style={styles.button}>
-          Send Message
+          Add Project
         </button>
       </form>
     </div>
@@ -131,15 +141,15 @@ const styles = {
   success: {
     background: "#ddffdd",
     padding: "10px",
-    borderRadius: "6px",
+    borderRadius: "5px",
     color: "#2d7a2d",
   },
   error: {
     background: "#ffdddd",
     padding: "10px",
-    borderRadius: "6px",
+    borderRadius: "5px",
     color: "#b30000",
   },
 };
 
-export default Contact;
+export default AddProject;

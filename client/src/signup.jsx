@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 
-const Contact = () => {
+const Signup = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    message: "",
+    password: "",
   });
 
-  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  // Handle input changes
+  // Handle input change
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -21,27 +21,30 @@ const Contact = () => {
   // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess("");
     setError("");
+    setSuccess("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/contacts", {
+      const res = await fetch("http://localhost:3000/auth/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Error submitting contact form");
+        setError(data.error || "Signup failed");
         return;
       }
 
-      setSuccess("Message sent successfully!");
-      setFormData({ name: "", email: "", message: "" });
+      setSuccess("Signup successful! Redirecting to Signin...");
+      setFormData({ name: "", email: "", password: "" });
+
+      // Redirect after 1.5 seconds
+      setTimeout(() => {
+        window.location.href = "/signin";
+      }, 1500);
 
     } catch (err) {
       setError("Something went wrong. Try again.");
@@ -50,10 +53,10 @@ const Contact = () => {
 
   return (
     <div style={styles.container}>
-      <h2>Contact Us</h2>
+      <h2 style={styles.heading}>Create an Account</h2>
 
-      {success && <p style={styles.success}>{success}</p>}
       {error && <p style={styles.error}>{error}</p>}
+      {success && <p style={styles.success}>{success}</p>}
 
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
@@ -76,32 +79,41 @@ const Contact = () => {
           required
         />
 
-        <textarea
-          name="message"
-          placeholder="Your Message"
-          value={formData.message}
+        <input
+          type="password"
+          name="password"
+          placeholder="Password (min 6 characters)"
+          value={formData.password}
           onChange={handleChange}
-          style={styles.textarea}
+          style={styles.input}
           required
         />
 
         <button type="submit" style={styles.button}>
-          Send Message
+          Sign Up
         </button>
       </form>
+
+      <p style={{ marginTop: "15px" }}>
+        Already have an account? <a href="/signin">Sign In</a>
+      </p>
     </div>
   );
 };
 
-// Styles
+// Inline styles (clean + simple)
 const styles = {
   container: {
-    width: "450px",
+    width: "350px",
     margin: "40px auto",
     padding: "25px",
-    background: "white",
-    border: "1px solid #ddd",
     borderRadius: "10px",
+    background: "#ffffff",
+    border: "1px solid #ddd",
+    textAlign: "center",
+  },
+  heading: {
+    marginBottom: "20px",
   },
   form: {
     display: "flex",
@@ -113,33 +125,26 @@ const styles = {
     borderRadius: "6px",
     border: "1px solid #ccc",
   },
-  textarea: {
-    padding: "10px",
-    height: "90px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-  },
   button: {
     padding: "10px",
-    background: "#3b5bff",
-    color: "white",
+    borderRadius: "6px",
     border: "none",
-    borderRadius: "6px",
+    backgroundColor: "#4caf50",
+    color: "#fff",
     cursor: "pointer",
-    fontWeight: "bold",
-  },
-  success: {
-    background: "#ddffdd",
-    padding: "10px",
-    borderRadius: "6px",
-    color: "#2d7a2d",
   },
   error: {
     background: "#ffdddd",
-    padding: "10px",
+    color: "#d8000c",
+    padding: "8px",
     borderRadius: "6px",
-    color: "#b30000",
+  },
+  success: {
+    background: "#ddffdd",
+    color: "#4F8A10",
+    padding: "8px",
+    borderRadius: "6px",
   },
 };
 
-export default Contact;
+export default Signup;
